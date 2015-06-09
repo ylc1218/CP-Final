@@ -1,0 +1,146 @@
+package cloud.project.database;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import javax.management.Query;
+import javax.sql.rowset.CachedRowSet;
+
+import com.sun.rowset.CachedRowSetImpl;
+
+import cloud.project.Header;
+import cloud.project.parse.Article;
+
+public class MysqlService {
+	private static final String DB_NAME = "creeper";
+	
+	private static Connection connect(){
+		Connection con=null;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");			
+			con = DriverManager.getConnection("jdbc:mysql://"+Header.DB_DNS+"/"+DB_NAME+"?useUnicode=true&characterEncoding=utf-8",
+					Header.DB_ACCOUNT, Header.DB_PSW);			
+		} catch (SQLException e) {
+			System.out.println("Connect DB Exception :" + e.toString());
+		} catch (ClassNotFoundException e){
+			e.toString();
+		}
+		return con;
+	}
+	
+	private static Statement createStatement(Connection con){
+		Statement stat=null;
+		try {
+			stat=con.createStatement();
+		} catch (SQLException e) {
+			System.out.println("Create stat DB Exception :" + e.toString());
+		}
+		return stat;
+	}
+	
+	private static void disconnect(Connection con){
+		try {
+			con.close();
+		} catch (SQLException e) {
+			System.out.println("Disconnect DB Exception :" + e.toString());
+		}
+	}
+	
+	
+	public static CachedRowSet select(String sql){
+		CachedRowSet crs=null;
+		ResultSet rs=null;
+		Connection con=connect();
+		Statement stat=MysqlService.createStatement(con);
+		try {
+			rs=stat.executeQuery(sql);
+			crs=new CachedRowSetImpl();
+	        crs.populate(rs);	
+	        rs.close();
+		} catch (SQLException e) {
+			System.out.println("SelectDB Exception :" + e.toString());
+		} finally{
+			 disconnect(con);
+		}
+		return crs;
+	}
+	
+	public static int update(String sql){
+		int result=-1;
+		Connection con=connect();
+		Statement stat=MysqlService.createStatement(con);
+		try {
+			result=stat.executeUpdate(sql);	
+		} catch (SQLException e) {
+			System.out.println("UpdateDB Exception :" + e.toString());
+		} finally{
+			disconnect(con);
+		}
+		return result;
+	}
+	
+	public static int insert(String sql){
+		Connection con=connect();
+		Statement stat=MysqlService.createStatement(con);		
+		int result=0;
+		try {
+			result=stat.executeUpdate(sql);			
+		} catch (SQLException e) {
+			System.out.println("insertDB Exception :" + e.toString());
+		} finally{
+			disconnect(con);
+		}
+		return result;
+	}
+	
+	public static int insertGetAuto(String sql){
+		Connection con=connect();
+		Statement stat=MysqlService.createStatement(con);
+		int uid=-1;
+		try {
+			stat.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
+			ResultSet rs = stat.getGeneratedKeys();
+		    if (rs.next()) {
+		      uid = rs.getInt(1);
+		    }
+		} catch (SQLException e) {
+			System.out.println("insertDB Exception :" + e.toString());
+		} finally{
+			disconnect(con);
+		}
+		return uid;
+	}
+	
+	public static void insertArticle(Article article){
+		Connection con=connect();
+		//"INSERT INTO article(title, source_id, url, category_id, author, time, content) "
+		PreparedStatement stat;
+		try {
+			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content)"
+					+ "VALUES(?,?,?,?,?,?,?)");
+			stat.setString(1, article.getTitle()); //title
+			stat.setInt(2, article.getSrc()); //src_id
+			stat.setString(3, article.getUrl()); //url
+			stat.setInt(4, article.getCat()); //cat_id
+			stat.setString(5, article.getAuthor()); //author
+			//stat.setDate(6, new java.sql.Date(article.getDate().getTime())); //time			
+			stat.setString(7, article.paragraphStr()); //content
+			stat.setObject(6, article.getDate());
+			
+			stat.executeUpdate();
+			stat.close();
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+}
