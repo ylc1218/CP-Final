@@ -40,9 +40,9 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			System.out.println(item.getFeedTitle() + " - " + item.getTitle() + ": " + item.getLink());
-			//HtmlParser.parseCnn(item.getLink());
-			//System.out.println("--------------------------------");
+			//System.out.println(item.getFeedTitle() + " - " + item.getTitle() + ": " + item.getLink());
+			HtmlParser.parseVoa(item.getLink(), item.getDate(), item.getImg());
+			System.out.println("--------------------------------");
 		}
 	}
 	
@@ -60,8 +60,8 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			System.out.println(item.getFeedTitle() + " - " + item.getTitle() + ": " + item.getLink());
-			//HtmlParser.parseCnn(item.getLink());
+			System.out.println(item.getTitle() + ": " + item.getLink());
+			//HtmlParser.parse60s(item.getLink());
 			//System.out.println("--------------------------------");
 		}
 	}
@@ -84,7 +84,7 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			System.out.println(item.getFeedTitle() + " - " + item.getTitle() + ": " + item.getLink());
+			System.out.println(item.getTitle() + ": " + item.getLink());
 		}
 		
 		/* Schedule a timer to poll feeds every 5 minutes */

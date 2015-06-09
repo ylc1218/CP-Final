@@ -25,8 +25,8 @@ public class Test {
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/06/football/champions-league-juventus-barcelona/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fedition_football+%28RSS%3A+CNNi+-+Football%29");
 		//HtmlParser.parseVoa("http://www.voanews.com/content/robin-williams-family-at-odds-over-actor-estate/2802825.html");
 		//HtmlParser.parse60s("http://www.scientificamerican.com/podcast/episode/vaccine-aims-at-fly-host-of-disease-parasite/");
-		PollHandler.pollCnn();
-		//PollHandler.pollVoa();
+		//PollHandler.pollCnn();
+		PollHandler.pollVoa();
 		//PollHandler.poll60s();
 	}	
 

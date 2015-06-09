@@ -3,6 +3,7 @@ package cloud.project.rss;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
  
@@ -20,8 +21,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 
 
+
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
  
@@ -158,23 +162,17 @@ public class RSS {
 					String articleTitle = getTagValue("title", eElement);
 					String articleLink = getTagValue("link", eElement);
 					String articleGuid = getTagValue("guid", eElement);
-					String articleTime = getTagValue("pubDate", eElement);
-					
-					//System.out.println(articleTime);
-					
-					DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-					formatter.setTimeZone(TimeZone.getTimeZone("Asia/Taipei"));
-					Date date = formatter.parse(articleTime);					
-					//System.out.println(date);
+					String articleImg = getImage(eElement);
+					String articleTime = getTagValue("pubDate", eElement);					
+					Date articleCtsDate = getCtsDate(articleTime);					
 				    
 					if(cache.contains(articleGuid)) {
-						continue;
-						
+						continue;						
 					}
 					
 					cache.add(articleGuid);
  
-					RSSItem item = new RSSItem(articleTitle, articleLink, feedTitle, date);
+					RSSItem item = new RSSItem(articleTitle, articleLink, articleCtsDate, articleImg);
  
 					items.add(item);
  
@@ -194,12 +192,24 @@ public class RSS {
 	 * @return String: the value of a node within an element
 	 */
 	
-	private String getTagValue(String sTag, Element eElement) {
+	private String getTagValue(String sTag, Element eElement) {		
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
- 
-		Node nValue = (Node) nlList.item(0);
- 
+		Node nValue = (Node) nlList.item(0);		
 		return nValue.getNodeValue();
+	}
+	
+	private String getImage(Element eElement){
+		String photoUrl="";
+		NodeList nlList = eElement.getElementsByTagName("enclosure");
+		if(nlList.getLength()>0){
+			Node node=nlList.item(0);
+			NamedNodeMap map = node.getAttributes();
+			Node url = map.getNamedItem("url");
+			Node type = map.getNamedItem("type");
+			if(url!=null && type!=null && type.getNodeValue().startsWith("image"))
+				photoUrl = url.getNodeValue();
+		}				
+		return photoUrl;
 	}
  
 	/* 
@@ -211,20 +221,27 @@ public class RSS {
 		return System.currentTimeMillis() / 1000;
 	}
 	
+	private Date getCtsDate(String time) throws ParseException{
+		DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+		formatter.setTimeZone(TimeZone.getTimeZone("Asia/Taipei"));
+		Date date = formatter.parse(time);
+		return date;		
+	}
+	
 	/*
 	 * public class RSSItem
 	 */
  
 	public class RSSItem {
 		private String title;
-		private String link; 
-		private String feedTitle;
+		private String link; 		
+		private String img;
 		private Date date;
  
-		public RSSItem(String title, String link, String feedTitle, Date date) {
+		public RSSItem(String title, String link, Date date, String img) {
 			this.title = title;
 			this.link = link;
-			this.feedTitle = feedTitle;
+			this.img = img;
 			this.date = date;
 		}
 		
@@ -236,12 +253,12 @@ public class RSS {
 			return this.link;
 		}
 
-		public String getFeedTitle() {
-			return this.feedTitle;
+		public String getImg() {
+			return this.img;
 		}
 		
 		public Date getDate(){
 			return this.date;
 		}
-	}
+	}		
 }

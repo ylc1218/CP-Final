@@ -18,16 +18,17 @@ public class HtmlParser {
 	
 	public static void parseCnn(String urlStr, Date date){
 		//http://edition.cnn.com/services/rss/
+		//http://rss.cnn.com/rss/cnn_latest.rss
 		//http://edition.cnn.com/2015/06/01/politics/yemen-four-americans-held-houthis/index.html
 		try{
 			Response response = Jsoup.connect(urlStr).followRedirects(true).execute();
 			Document xmlDoc = response.parse();
 			urlStr = response.url().toString();
 			URL url = new URL(urlStr);
+			String img = "";
 			
 			Elements titleEle = xmlDoc.getElementsByClass("pg-headline");
 			Elements authorEle = xmlDoc.getElementsByClass("metadata__byline__author");
-			//Elements timeEle = xmlDoc.getElementsByClass("update-time");
 			
 			//filter "fast facts"
 			if("CNN Library".equalsIgnoreCase(authorEle.text())){
@@ -39,11 +40,13 @@ public class HtmlParser {
 			int src = ArticleCategory.SRC_CNN;
 			String[] path = url.getPath().split("/");
 			String catStr = path[4];
+			
 			//filter "opinion"
 			if(catStr.equalsIgnoreCase("opinions")){
 				System.out.println(titleEle.text()+"--- is opinion");
 				return;
 			}
+			
 			int cat = ArticleCategory.getCatId(src, catStr);			
 			System.out.println(catStr+" "+cat);
 			
@@ -56,12 +59,9 @@ public class HtmlParser {
 			for(Element element : paragraphsEle){
 				paragraphs.add(element.text());
 			}
-			
-			
-			
-			
+												
 			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
-			Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs);
+			Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
 			System.out.println(article);
 			articleDbHandler.insertArticle(article);
 			
@@ -73,37 +73,48 @@ public class HtmlParser {
 		
 	}
 	
-	public static void parseVoa(String urlStr, Date date) throws Exception {
+	public static void parseVoa(String urlStr, Date date, String img) throws Exception {
 		//http://www.voanews.com/api/epiqq
 		//http://www.voanews.com/content/study-says-well-known-common-drug-may-block-ebola/2806197.html
-		Response response = Jsoup.connect(urlStr).followRedirects(true).execute();
-		Document xmlDoc = response.parse();
-		urlStr = response.url().toString();
-		URL url = new URL(urlStr);
-		
-		Elements catEle = xmlDoc.getElementsByClass("sitetitle");
-		Element titleEle = catEle.get(0).siblingElements().get(0);
-		Elements authorEle = xmlDoc.getElementsByClass("author");
-		//Elements timeEle = xmlDoc.getElementsByClass("article_date");										
-		
-		Element textEle = xmlDoc.getElementById("ctl00_ctl00_cpAB_cp1_cbcContentBreak");
-		Elements paragraphsEle = textEle.getElementsByTag("p");
-		LinkedList<String> paragraphs = new LinkedList<String>();
-		for(Element element : paragraphsEle){
-			paragraphs.add(element.text());
+		try{
+			Response response = Jsoup.connect(urlStr).followRedirects(true).execute();
+			Document xmlDoc = response.parse();
+			urlStr = response.url().toString();
+			URL url = new URL(urlStr);
+			String[] path = url.getPath().split("/");
+			
+			if(!path[1].equals("content")){
+				System.out.println(urlStr+"-- is not content");
+				return;
+			}
+			
+			Elements catEle = xmlDoc.getElementsByClass("sitetitle");
+			Element titleEle = catEle.get(0).siblingElements().get(0);
+			Elements authorEle = xmlDoc.getElementsByClass("author");
+			
+			Element textEle = xmlDoc.getElementById("ctl00_ctl00_cpAB_cp1_cbcContentBreak");
+			Elements paragraphsEle = textEle.getElementsByTag("p");
+			LinkedList<String> paragraphs = new LinkedList<String>();
+			for(Element element : paragraphsEle){
+				paragraphs.add(element.text());
+			}
+			
+			
+			int src = ArticleCategory.SRC_VOA;
+			String catStr = catEle.text().split("/")[1].trim();
+			int cat = ArticleCategory.getCatId(src, catStr);
+			
+			System.out.println(catStr+" "+cat);
+			
+			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
+			Article article = new Article(titleEle.text(), authorEle.text(), date, urlStr, src, cat, paragraphs, img);
+			System.out.println(article);
+			//articleDbHandler.insertArticle(article);
+		}catch(Exception e){
+			System.out.println(urlStr+" excpetion");
+			e.printStackTrace();
+			return;
 		}
-		
-		
-		int src = ArticleCategory.SRC_VOA;
-		String catStr = catEle.text().split("/")[1].trim();
-		int cat = ArticleCategory.getCatId(src, catStr);
-		
-		System.out.println(catStr+" "+cat);
-		
-		//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
-		Article article = new Article(titleEle.text(), authorEle.text(), date, urlStr, src, cat, paragraphs);
-		System.out.println(article);
-		articleDbHandler.insertArticle(article);
 		
 	}
 	
@@ -114,6 +125,7 @@ public class HtmlParser {
 		Document xmlDoc = response.parse();
 		urlStr = response.url().toString();
 		URL url = new URL(urlStr);
+		String img = "";
 
 		
 		Elements titleEle = xmlDoc.getElementsByClass("article-title");
@@ -137,7 +149,7 @@ public class HtmlParser {
 		int cat = ArticleCategory.getCatId(src, catStr);
 		System.out.println(catStr+" "+cat);
 		//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
-		Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs);
+		Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
 		System.out.println(article);
 		articleDbHandler.insertArticle(article);		
 	}

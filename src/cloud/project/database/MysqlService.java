@@ -118,7 +118,7 @@ public class MysqlService {
 	
 	public static void insertArticle(Article article){
 		Connection con=connect();
-		//"INSERT INTO article(title, source_id, url, category_id, author, time, content) "
+		//"INSERT INTO article(title, articleSourceId, url, category_id, author, time, content) "
 		PreparedStatement stat;
 		try {
 			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content)"
@@ -128,9 +128,9 @@ public class MysqlService {
 			stat.setString(3, article.getUrl()); //url
 			stat.setInt(4, article.getCat()); //cat_id
 			stat.setString(5, article.getAuthor()); //author
-			//stat.setDate(6, new java.sql.Date(article.getDate().getTime())); //time			
+			stat.setObject(6, article.getDate()); //time		
 			stat.setString(7, article.paragraphStr()); //content
-			stat.setObject(6, article.getDate());
+			
 			
 			stat.executeUpdate();
 			stat.close();

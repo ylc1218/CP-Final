@@ -23,7 +23,7 @@ public class ArticleCategory {
 				if(catStr.equalsIgnoreCase("technology")) return CAT_SCIENCE_TECHNOLOGY;				
 				return CAT_SCIENCE_TECHNOLOGY;
 			case SRC_VOA:
-				if(catStr.equalsIgnoreCase("usa") || catStr.equalsIgnoreCase("africa") || catStr.equalsIgnoreCase("asia") || catStr.equalsIgnoreCase("mideast") || catStr.equalsIgnoreCase("europe")) return CAT_WORLD;
+				if(catStr.equalsIgnoreCase("Americas") || catStr.equalsIgnoreCase("usa") || catStr.equalsIgnoreCase("africa") || catStr.equalsIgnoreCase("asia") || catStr.equalsIgnoreCase("mideast") || catStr.equalsIgnoreCase("europe") || catStr.equalsIgnoreCase("Middle East")) return CAT_WORLD;
 				if(catStr.equalsIgnoreCase("Science & Technology")) return CAT_SCIENCE_TECHNOLOGY;
 				if(catStr.equalsIgnoreCase("health")) return CAT_HEALTH;
 				if(catStr.equalsIgnoreCase("Arts & Entertainment")) return CAT_ENTERTAINMENT;

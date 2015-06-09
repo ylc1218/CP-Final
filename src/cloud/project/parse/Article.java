@@ -11,15 +11,17 @@ public class Article{
 	private int src;
 	private int cat;
 	private LinkedList<String> paragraphs;
+	private String img;
 	
-	public Article(String title, String author, Date date, String url, int src, int cat, LinkedList<String> paragraphs){
+	public Article(String title, String author, Date date, String url, int src, int cat, LinkedList<String> paragraphs, String img){		
 		this.title = title;
 		this.author = author;
 		this.date = date;
 		this.url = url;
 		this.src = src;
 		this.cat = cat;
-		this.paragraphs = paragraphs;				
+		this.paragraphs = paragraphs;
+		this.img = img;
 	}
 	
 	@Override
@@ -27,6 +29,7 @@ public class Article{
 		StringBuilder sb = new StringBuilder();
 		sb.append("url:"+ url+"\n");
 		sb.append("title:"+ title+"\n");
+		sb.append("img:"+img+"\n");
 		sb.append("author:"+author+"\n");
 		sb.append("date:"+date+"\n");
 		sb.append("text:"+paragraphStr());			
@@ -64,5 +67,9 @@ public class Article{
 	
 	public int getCat(){
 		return cat;
+	}
+	
+	public String getImg(){
+		return img;
 	}
 }
