@@ -89,7 +89,7 @@ public class HtmlParser {
 				article.setS3ImgUrl(s3Url);
 			}
 			System.out.println(article);			
-			//articleDbHandler.insertArticle(article);
+			articleDbHandler.insertArticle(article);
 			
 		}catch(Exception e){
 			System.out.println(urlStr+" excpetion");
@@ -139,7 +139,7 @@ public class HtmlParser {
 				article.setS3ImgUrl(s3Url);
 			}
 			System.out.println(article);
-			//articleDbHandler.insertArticle(article);
+			articleDbHandler.insertArticle(article);
 		}catch(Exception e){
 			System.out.println(urlStr+" excpetion");
 			e.printStackTrace();
@@ -155,7 +155,7 @@ public class HtmlParser {
 		Document xmlDoc = response.parse();
 		urlStr = response.url().toString();
 		URL url = new URL(urlStr);
-		String img = "";
+		String img = ""; //60s doesn't have image
 
 		
 		Elements titleEle = xmlDoc.getElementsByClass("article-title");				
@@ -183,7 +183,10 @@ public class HtmlParser {
 		
 		//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
 		Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
-		System.out.println(article);
+		//System.out.println(article);
+		System.out.println(article.getUrl());
+		System.out.println(article.getFirst50Words());
+		System.out.println("");
 		//articleDbHandler.insertArticle(article);		
 	}
 	//http://www.reuters.com/article/2015/06/06/us-tennis-french-women-idUSKBN0OM0MS20150606

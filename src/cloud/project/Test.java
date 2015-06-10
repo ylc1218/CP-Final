@@ -32,6 +32,8 @@ public class Test {
 		PollHandler.poll60s();
 		//ImageHandler.saveImage("http://gdb.voanews.com/30D156D4-4570-4DB3-9AEE-41994F5EB36A_cx0_cy10_cw0_w800_h450.jpg", "./myImg.jpg");
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/09/living/cnnphotos-american-puzzles/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fcnn_latest+%28RSS%3A+CNN+-+Most+Recent%29%20excpetion", new Date());
+		
+	
 	}	
 
 	

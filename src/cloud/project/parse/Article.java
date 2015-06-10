@@ -2,6 +2,8 @@ package cloud.project.parse;
 
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Article{
 	private String title;
@@ -13,6 +15,7 @@ public class Article{
 	private LinkedList<String> paragraphs;
 	private String img;
 	private String s3ImgUrl="";
+	private String paragraphStr="";
 	
 	public Article(String title, String author, Date date, String url, int src, int cat, LinkedList<String> paragraphs, String img){		
 		this.title = title;
@@ -23,7 +26,7 @@ public class Article{
 		this.cat = cat;
 		this.paragraphs = paragraphs;
 		this.img = img;
-	}
+	}		
 	
 	@Override
 	public String toString(){
@@ -34,17 +37,37 @@ public class Article{
 		sb.append("(s3-img:"+s3ImgUrl+")\n");
 		sb.append("author:"+author+"\n");
 		sb.append("date:"+date+"\n");
-		sb.append("text:"+paragraphStr());			
+		sb.append("text:"+getParagraphStr());			
 		sb.append("-----------------------------\n");
 		return sb.toString();
 	}
+
 	
-	public String paragraphStr(){
+	public String getParagraphStr(){
+		if(paragraphStr!="") return paragraphStr;
 		StringBuilder sb = new StringBuilder();
 		for(String paragraph:paragraphs){
-			sb.append("<p>"+paragraph+"</p>");
+			paragraph = paragraph.replaceAll("¡¦", "'");
+			String spanP = paragraph.replaceAll("([a-zA-Z']+)", "<span>$1</span>");
+			sb.append("<p>"+spanP+"</p>");
 		}
-		return sb.toString();
+		paragraphStr = sb.toString();
+		return paragraphStr;
+	}
+	
+	public String getFirst50Words(){
+		String str = getParagraphStr();
+		Pattern p = Pattern.compile("<span>(.*?)</span>");
+		Matcher m = p.matcher(str);
+		int cnt=0;
+		while(m.find() && cnt<50){			
+			m.group();
+			cnt++;
+		}
+		int lastId = m.start();
+		str = str.substring(0, lastId);
+		
+		return str.replaceAll("<p>|</p>", "");
 	}
 	
 	public String getTitle(){

@@ -122,14 +122,14 @@ public class MysqlService {
 		PreparedStatement stat;
 		try {
 			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content, image)"
-					+ "VALUES(?,?,?,?,?,?,?)");
+					+ "VALUES(?,?,?,?,?,?,?,?)");
 			stat.setString(1, article.getTitle()); //title
 			stat.setInt(2, article.getSrc()); //src_id
 			stat.setString(3, article.getUrl()); //url
 			stat.setInt(4, article.getCat()); //cat_id
 			stat.setString(5, article.getAuthor()); //author
 			stat.setObject(6, article.getDate()); //time		
-			stat.setString(7, article.paragraphStr()); //content
+			stat.setString(7, article.getParagraphStr()); //content
 			stat.setString(8, article.getS3ImgUrl()); //img url
 			
 			
