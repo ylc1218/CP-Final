@@ -61,7 +61,7 @@ public class PollHandler {
 		System.out.println(list.size());
 		for(RSSItem item : list) {
 			System.out.println(item.getTitle() + ": " + item.getLink());
-			//HtmlParser.parse60s(item.getLink());
+			HtmlParser.parse60s(item.getLink(), item.getDate());
 			//System.out.println("--------------------------------");
 		}
 	}

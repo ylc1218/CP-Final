@@ -35,7 +35,7 @@ public class Article{
 		sb.append("author:"+author+"\n");
 		sb.append("date:"+date+"\n");
 		sb.append("text:"+paragraphStr());			
-		
+		sb.append("-----------------------------\n");
 		return sb.toString();
 	}
 	

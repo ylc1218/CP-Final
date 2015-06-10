@@ -27,37 +27,54 @@ public class HtmlParser {
 			Document xmlDoc = response.parse();
 			urlStr = response.url().toString();
 			URL url = new URL(urlStr);
-			String img = "";
 			
 			Elements titleEle = xmlDoc.getElementsByClass("pg-headline");
-			Elements authorEle = xmlDoc.getElementsByClass("metadata__byline__author");
 			
-			//filter "fast facts"
-			if("CNN Library".equalsIgnoreCase(authorEle.text())){
+			//author
+			Elements authorEle = xmlDoc.getElementsByClass("metadata__byline__author");						
+			if("CNN Library".equalsIgnoreCase(authorEle.text())){ //filter fast facts
 				System.out.println(titleEle.text()+"--- by CNN Library");
 				return;
 			}
+			String author = authorEle.text();
+			if(author.startsWith("By ")) author = author.replaceFirst("By ", ""); //trim prefix
+			if(author.endsWith(", CNN")) author = author.replace(", CNN",  ""); //trim postfix
+			else if(author.endsWith(", special to CNN")) author = author.replace(", special to CNN",  "");
+			else if(author.endsWith(", Special to CNN")) author = author.replace(", Special to CNN",  "");
+			else if(author.endsWith(", for CNN")) author = author.replace(", for CNN",  "");
 			
-			
+			//category
 			int src = ArticleCategory.SRC_CNN;
 			String[] path = url.getPath().split("/");
-			String catStr = path[4];
-			
-			//filter "opinion"
-			if(catStr.equalsIgnoreCase("opinions")){
+			String catStr = path[4];						
+			if(catStr.equalsIgnoreCase("opinions")){ //filter "opinion"
 				System.out.println(titleEle.text()+"--- is opinion");
 				return;
-			}
-			
+			}			
 			int cat = ArticleCategory.getCatId(src, catStr);			
-			System.out.println(catStr+" "+cat);
+			//System.out.println(catStr+" "+cat);
 			
-			String author = authorEle.text();
-			if(author.startsWith("By ")) author = author.replaceFirst("By ", "");
-			if(author.endsWith(", CNN")) author = author.replace(", CNN",  "");
-			if(author.endsWith(", special to CNN")) author = author.replace(", special to CNN",  "");
-			if(author.endsWith(", Special to CNN")) author = author.replace(", Special to CNN",  "");
+			//image
+			String img = "";
+			Element imgBlkEle = xmlDoc.getElementsByClass("pg-rail-tall__head").first();
+			if(imgBlkEle!=null){
+				Elements imgContainer = imgBlkEle.getElementsByClass("l-container");
+				if(imgContainer.size()==1){ //more likely is image, size()==2 is usually video
+					Elements imgsEle = imgContainer.first().getElementsByTag("img");
+					Element imgEle = imgsEle.first();
+					img = imgEle.attr("data-src-medium");				
+				}
+			}
+			else{
+				imgBlkEle = xmlDoc.getElementsByClass("el__position").first();
+				if(imgBlkEle!=null){
+					Elements imgsEle = imgBlkEle.getElementsByTag("img");
+					Element imgEle = imgsEle.first();
+					img = imgEle.attr("data-src-medium");
+				}
+			}									
 			
+			//content			
 			Elements paragraphsEle = xmlDoc.getElementsByClass("zn-body__paragraph"); 
 	
 			LinkedList<String> paragraphs = new LinkedList<String>();
@@ -65,10 +82,13 @@ public class HtmlParser {
 				paragraphs.add(element.text());
 			}
 												
-			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
+			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs, img)
 			Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
-			//System.out.println(article);
-			System.out.println(article.getAuthor());
+			if(img!=null && img!=""){
+				String s3Url = ImageHandler.saveImage(img, new Date().getTime()+".jpg");
+				article.setS3ImgUrl(s3Url);
+			}
+			System.out.println(article);			
 			//articleDbHandler.insertArticle(article);
 			
 		}catch(Exception e){
@@ -138,14 +158,14 @@ public class HtmlParser {
 		String img = "";
 
 		
-		Elements titleEle = xmlDoc.getElementsByClass("article-title");
+		Elements titleEle = xmlDoc.getElementsByClass("article-title");				
+		
+		//author
 		Elements author_timeEle = xmlDoc.getElementsByClass("article-author");
-		Elements catEle = xmlDoc.getElementsByAttributeValue("itemProp", "title");
 		String[] authorSplit = author_timeEle.text().split("\\|");
 		String author = authorSplit[0].split("By ")[1];
-		//String time = authorSplit[1].trim();
-		String catStr = catEle.get(0).text();
 		
+		//content
 		Elements textEle = xmlDoc.getElementsByClass("article-content");
 		Elements paragraphsEle = textEle.get(0).getElementsByTag("p");		
 		LinkedList<String> paragraphs = new LinkedList<String>();
@@ -154,14 +174,17 @@ public class HtmlParser {
 			paragraphs.add(element.text());
 		}
 		
-		
+		//category
 		int src = ArticleCategory.SRC_60S;
+		Elements catEle = xmlDoc.getElementsByAttributeValue("itemProp", "title");
+		String catStr = catEle.get(0).text();		
 		int cat = ArticleCategory.getCatId(src, catStr);
 		System.out.println(catStr+" "+cat);
+		
 		//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
 		Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
 		System.out.println(article);
-		articleDbHandler.insertArticle(article);		
+		//articleDbHandler.insertArticle(article);		
 	}
 	//http://www.reuters.com/article/2015/06/06/us-tennis-french-women-idUSKBN0OM0MS20150606
 	//http://www.scientificamerican.com/
