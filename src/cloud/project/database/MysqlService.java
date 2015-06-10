@@ -118,10 +118,10 @@ public class MysqlService {
 	
 	public static void insertArticle(Article article){
 		Connection con=connect();
-		//"INSERT INTO article(title, articleSourceId, url, category_id, author, time, content) "
+		//"INSERT INTO article(title, articleSourceId, url, category_id, author, time, content, image) "
 		PreparedStatement stat;
 		try {
-			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content)"
+			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content, image)"
 					+ "VALUES(?,?,?,?,?,?,?)");
 			stat.setString(1, article.getTitle()); //title
 			stat.setInt(2, article.getSrc()); //src_id
@@ -130,6 +130,7 @@ public class MysqlService {
 			stat.setString(5, article.getAuthor()); //author
 			stat.setObject(6, article.getDate()); //time		
 			stat.setString(7, article.paragraphStr()); //content
+			stat.setString(8, article.getS3ImgUrl()); //img url
 			
 			
 			stat.executeUpdate();

@@ -11,7 +11,7 @@ public class PollHandler {
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
 		rss = new RSS("http://rss.cnn.com/rss/cnn_latest.rss", 60);
 		
-		System.out.println("Polling feed...");
+		System.out.println("Polling cnn feed...");
 		ArrayList<RSSItem> list = null;
 		try {
 			list = rss.poll();
@@ -31,7 +31,7 @@ public class PollHandler {
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
 		rss = new RSS("http://www.voanews.com/api/epiqq", 60);
 		
-		System.out.println("Polling feed...");
+		System.out.println("Polling voa feed...");
 		ArrayList<RSSItem> list = null;
 		try {
 			list = rss.poll();
@@ -51,7 +51,7 @@ public class PollHandler {
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
 		rss = new RSS("http://rss.sciam.com/sciam/60secsciencepodcast", 60);
 		
-		System.out.println("Polling feed...");
+		System.out.println("Polling 60s feed...");
 		ArrayList<RSSItem> list = null;
 		try {
 			list = rss.poll();

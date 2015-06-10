@@ -11,7 +11,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import cloud.project.Header;
 import cloud.project.database.ArticleDbHandler;
+import cloud.project.image.ImageHandler;
 
 public class HtmlParser {
 	public static ArticleDbHandler articleDbHandler = new ArticleDbHandler();
@@ -50,8 +52,11 @@ public class HtmlParser {
 			int cat = ArticleCategory.getCatId(src, catStr);			
 			System.out.println(catStr+" "+cat);
 			
-			String[] authorSplit = authorEle.text().split("By ");
-			String author = authorSplit[authorSplit.length-1];
+			String author = authorEle.text();
+			if(author.startsWith("By ")) author = author.replaceFirst("By ", "");
+			if(author.endsWith(", CNN")) author = author.replace(", CNN",  "");
+			if(author.endsWith(", special to CNN")) author = author.replace(", special to CNN",  "");
+			if(author.endsWith(", Special to CNN")) author = author.replace(", Special to CNN",  "");
 			
 			Elements paragraphsEle = xmlDoc.getElementsByClass("zn-body__paragraph"); 
 	
@@ -62,8 +67,9 @@ public class HtmlParser {
 												
 			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
 			Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
-			System.out.println(article);
-			articleDbHandler.insertArticle(article);
+			//System.out.println(article);
+			System.out.println(article.getAuthor());
+			//articleDbHandler.insertArticle(article);
 			
 		}catch(Exception e){
 			System.out.println(urlStr+" excpetion");
@@ -107,7 +113,11 @@ public class HtmlParser {
 			System.out.println(catStr+" "+cat);
 			
 			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
-			Article article = new Article(titleEle.text(), authorEle.text(), date, urlStr, src, cat, paragraphs, img);
+			Article article = new Article(titleEle.text(), authorEle.text(), date, urlStr, src, cat, paragraphs, img);			
+			if(img!=null && img!=""){
+				String s3Url = ImageHandler.saveImage(img, new Date().getTime()+".jpg");
+				article.setS3ImgUrl(s3Url);
+			}
 			System.out.println(article);
 			//articleDbHandler.insertArticle(article);
 		}catch(Exception e){

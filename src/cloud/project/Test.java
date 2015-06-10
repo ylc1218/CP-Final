@@ -13,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import cloud.project.database.MysqlService;
+import cloud.project.image.ImageHandler;
 import cloud.project.parse.HtmlParser;
 import cloud.project.rss.PollHandler;
 import cloud.project.rss.RSS;
@@ -25,14 +26,15 @@ public class Test {
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/06/football/champions-league-juventus-barcelona/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fedition_football+%28RSS%3A+CNNi+-+Football%29");
 		//HtmlParser.parseVoa("http://www.voanews.com/content/robin-williams-family-at-odds-over-actor-estate/2802825.html");
 		//HtmlParser.parse60s("http://www.scientificamerican.com/podcast/episode/vaccine-aims-at-fly-host-of-disease-parasite/");
-		//PollHandler.pollCnn();
-		PollHandler.pollVoa();
+		PollHandler.pollCnn();
+		//PollHandler.pollVoa();
 		//PollHandler.poll60s();
+		//ImageHandler.saveImage("http://gdb.voanews.com/30D156D4-4570-4DB3-9AEE-41994F5EB36A_cx0_cy10_cw0_w800_h450.jpg", "./myImg.jpg");
 	}	
 
 	
 	private static void sendGet() throws Exception {
-		 System.out.println("sendGet ...");
+		System.out.println("sendGet ...");
 		String url = "http://rss.cnn.com/~r/rss/cnn_latest/~3/a4jPEJ7BK1Y/index.html";
  
 		URL obj = new URL(url);

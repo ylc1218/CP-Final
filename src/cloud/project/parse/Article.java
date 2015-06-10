@@ -12,6 +12,7 @@ public class Article{
 	private int cat;
 	private LinkedList<String> paragraphs;
 	private String img;
+	private String s3ImgUrl="";
 	
 	public Article(String title, String author, Date date, String url, int src, int cat, LinkedList<String> paragraphs, String img){		
 		this.title = title;
@@ -30,6 +31,7 @@ public class Article{
 		sb.append("url:"+ url+"\n");
 		sb.append("title:"+ title+"\n");
 		sb.append("img:"+img+"\n");
+		sb.append("(s3-img:"+s3ImgUrl+")\n");
 		sb.append("author:"+author+"\n");
 		sb.append("date:"+date+"\n");
 		sb.append("text:"+paragraphStr());			
@@ -71,5 +73,13 @@ public class Article{
 	
 	public String getImg(){
 		return img;
+	}
+	
+	public String getS3ImgUrl(){
+		return s3ImgUrl;
+	}
+	
+	public void setS3ImgUrl(String url){
+		s3ImgUrl = url;	
 	}
 }
