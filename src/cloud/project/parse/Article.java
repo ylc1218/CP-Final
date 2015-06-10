@@ -67,7 +67,7 @@ public class Article{
 		int lastId = m.start();
 		str = str.substring(0, lastId);
 		
-		return str.replaceAll("<p>|</p>", "");
+		return str.replaceAll("<p>|</p>|<span></span>", "");
 	}
 	
 	public String getTitle(){

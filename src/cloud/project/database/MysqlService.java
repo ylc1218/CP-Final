@@ -131,10 +131,7 @@ public class MysqlService {
 			stat.setObject(6, article.getDate()); //time		
 			stat.setString(7, article.getParagraphStr()); //content
 			stat.setString(8, article.getS3ImgUrl()); //img url
-			
-			
-			stat.executeUpdate();
-			stat.close();
+						
 			con.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block

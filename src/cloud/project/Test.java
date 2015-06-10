@@ -29,6 +29,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.amazonaws.util.json.JSONArray;
+import com.amazonaws.util.json.JSONException;
 import com.amazonaws.util.json.JSONObject;
 
 import cloud.project.database.MysqlService;
@@ -51,10 +53,25 @@ public class Test {
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/09/living/cnnphotos-american-puzzles/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fcnn_latest+%28RSS%3A+CNN+-+Most+Recent%29%20excpetion", new Date());
 		
 		TranslationHandler.getDefaultWordsTranslation();
-	
+	 	//testJson();
 	}	
 
-	
+	private static void testJson() throws JSONException{
+		//String s =" {\"translation\":[\"loni\"],\"basic\":{\"explains\":[\"n. (Loni)人名；(德、意)洛尼\"]},\"query\":\"Loni\",\"errorCode\":0,\"web\":[{\"value\":[\"实验室\",\"Laboratory Of Neuro Imaging\",\"UCLA Laboratory of Neuro Imaging\"],\"key\":\"LONI\"},{\"value\":[\"罗尼·迪那米斯\"],\"key\":\"loni dunamis\"},{\"value\":[\"标签\"],\"key\":\"Loni Zwahlen\"}]}";
+		String s ="{\"translation\":[\"aaaaaaaaaaa\"],\"query\":\"aaaaaaaaaaa\"}";
+		JSONObject jsonObj = new JSONObject(s);
+		if(jsonObj.has("basic")){
+			JSONObject basicObj = (JSONObject) jsonObj.get("basic");
+			JSONArray jsonArr = basicObj.getJSONArray("explains");
+			System.out.println(jsonArr.toString());
+		}
+		else if(jsonObj.has("translation")){
+			JSONArray translationObj = (JSONArray) jsonObj.get("translation");
+			System.out.println(translationObj.toString());
+		}
+		
+		
+	}
 	private static void sendGet() throws Exception {
 		//System.out.println("sendGet ...");
 		String url = "http://fanyi.youdao.com/openapi.do?type=data&doctype=jsonp&version=1.1&relatedUrl=http%3A%2F%2Ffanyi.youdao.com%2Fopenapi%3Fpath%3Dweb-mode%26mode%3Ddicter&keyfrom=test&key=null&callback=c&translate=on&q=punctuation&ts=1433926580206";		
