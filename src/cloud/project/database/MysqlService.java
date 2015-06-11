@@ -120,6 +120,7 @@ public class MysqlService {
 		Connection con=connect();
 		//"INSERT INTO article(title, articleSourceId, url, category_id, author, time, content, image) "
 		PreparedStatement stat;
+		
 		try {
 			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content, image)"
 					+ "VALUES(?,?,?,?,?,?,?,?)");

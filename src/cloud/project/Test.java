@@ -35,6 +35,7 @@ import com.amazonaws.util.json.JSONObject;
 
 import cloud.project.database.MysqlService;
 import cloud.project.dictionary.TranslationHandler;
+import cloud.project.dictionary.TranslationHandler.WordParsed;
 import cloud.project.image.ImageHandler;
 import cloud.project.parse.HtmlParser;
 import cloud.project.rss.PollHandler;
@@ -53,11 +54,13 @@ public class Test {
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/09/living/cnnphotos-american-puzzles/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fcnn_latest+%28RSS%3A+CNN+-+Most+Recent%29%20excpetion", new Date());
 		
 		TranslationHandler.getDefaultWordsTranslation();
-	 	//testJson();
+	 	/*WordParsed word = TranslationHandler.getTranslation("his");
+	 	System.out.println(word.explains);*/
+	 			
 	}	
 
 	private static void testJson() throws JSONException{
-		//String s =" {\"translation\":[\"loni\"],\"basic\":{\"explains\":[\"n. (Loni)人名；(德、意)洛尼\"]},\"query\":\"Loni\",\"errorCode\":0,\"web\":[{\"value\":[\"实验室\",\"Laboratory Of Neuro Imaging\",\"UCLA Laboratory of Neuro Imaging\"],\"key\":\"LONI\"},{\"value\":[\"罗尼·迪那米斯\"],\"key\":\"loni dunamis\"},{\"value\":[\"标签\"],\"key\":\"Loni Zwahlen\"}]}";
+		//String s =" {\"translation\":[\"loni\"],\"basic\":{\"explains\":[\"n. (Loni)鈭箏���(敺瑯���)瘣側\"]},\"query\":\"Loni\",\"errorCode\":0,\"web\":[{\"value\":[\"摰�恕\",\"Laboratory Of Neuro Imaging\",\"UCLA Laboratory of Neuro Imaging\"],\"key\":\"LONI\"},{\"value\":[\"蝵側繚餈芷蝐單\"],\"key\":\"loni dunamis\"},{\"value\":[\"��倌\"],\"key\":\"Loni Zwahlen\"}]}";
 		String s ="{\"translation\":[\"aaaaaaaaaaa\"],\"query\":\"aaaaaaaaaaa\"}";
 		JSONObject jsonObj = new JSONObject(s);
 		if(jsonObj.has("basic")){
