@@ -70,7 +70,7 @@ public class TranslationHandler {
 		String word = "";
 								
 		PrintWriter writer = new PrintWriter(new FileOutputStream(new File("output.txt"),true /* append = true */)); 		
-		BufferedReader br = new BufferedReader(new FileReader("./data/exception-reparse2/not_found_words.txt"));
+		BufferedReader br = new BufferedReader(new FileReader("./not_found_words.txt"));
 		String line;
 		line = br.readLine();
 		int cnt =0;
@@ -81,11 +81,9 @@ public class TranslationHandler {
 			word = line.split("\t")[0];
 			line = br.readLine();
 			//if(cnt<1544) continue;
-			try {
-				/*ArrayList<String> translations = getTranslation(word);
-				for(String translation : translations) writer.println("  "+translation);				
-				writer.flush();*/
-				WordParsed wordParsed = getTranslation(word);
+			try {								
+				//WordParsed wordParsed = getTranslationApi(word);
+				WordParsed wordParsed = getTranslationHtml(word);
 				if(wordParsed.hasExplain==true){
 					writer.print(cnt+"\t"+word);
 					writer.println("\t"+wordParsed.explains+"\t"+wordParsed.phonetic);
@@ -111,24 +109,39 @@ public class TranslationHandler {
 		exceptionWriter.close();
 	}
 	
-	public static WordParsed getTranslation(String word) throws IOException, JSONException{
-		/*Response response;
+	public static WordParsed getTranslationHtml(String word) throws IOException{
+		Response response;
 		ArrayList<String> translations = new ArrayList<String>();
 
 		response = Jsoup.connect("http://dict.youdao.com/search?le=eng&q="+word+"&keyfrom=dict.top").followRedirects(true).execute();
 		Document xmlDoc = response.parse();
-		Element transContainer = xmlDoc.getElementsByClass("trans-container").first();
-		if(transContainer!=null){
+		Element transContainer = xmlDoc.getElementsByClass("trans-container").first();		
+		if(xmlDoc.getElementsByClass("error-wrapper").size()==0){
 			Elements translationsEle = transContainer.getElementsByTag("li");
-			System.out.println(word);
+			//System.out.println(word);
+			String expJsonStr = "";
 			for(Element translation : translationsEle){
 				String tradition = toLong(translation.text());
-				System.out.println("   "+tradition);
+				//System.out.println("   "+tradition);
 				translations.add(tradition);
+				JSONArray expJsonArr = new JSONArray(translations);
+				expJsonStr = expJsonArr.toString();
 			}
-		}			
+			
+			String phonetic = "";
+			Element wordBookEle = xmlDoc.getElementsByClass("wordbook-js").first();
+			Element phoneticEle = wordBookEle.getElementsByClass("phonetic").last();
+			if(phoneticEle!=null){
+				phonetic = phoneticEle.text().substring(1, phoneticEle.text().length()-1);
+			}
+			if(expJsonStr=="") return new WordParsed(false);
+			return  new WordParsed(expJsonStr, phonetic);
+		}
+		return new WordParsed(false);			
+	}
+	
+	public static WordParsed getTranslationApi(String word) throws IOException, JSONException{
 		
-		return translations;*/
 		
 		String url = "http://fanyi.youdao.com/openapi.do?type=data&doctype=jsonp&version=1.1&relatedUrl=http%3A%2F%2Ffanyi.youdao.com%2Fopenapi%3Fpath%3Dweb-mode%26mode%3Ddicter&keyfrom=test&key=null&callback=c&translate=on&q="+word+"&ts=1434036010644";		
 		URL obj = new URL(url);		

@@ -1,7 +1,6 @@
 package cloud.project.parse;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -11,14 +10,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import cloud.project.Header;
-import cloud.project.database.ArticleDbHandler;
 import cloud.project.image.ImageHandler;
 
 public class HtmlParser {
-	public static ArticleDbHandler articleDbHandler = new ArticleDbHandler();
 	
-	public static void parseCnn(String urlStr, Date date){
+	public static Article parseCnn(String urlStr, Date date){
 		//http://edition.cnn.com/services/rss/
 		//http://rss.cnn.com/rss/cnn_latest.rss
 		//http://edition.cnn.com/2015/06/01/politics/yemen-four-americans-held-houthis/index.html
@@ -34,7 +30,7 @@ public class HtmlParser {
 			Elements authorEle = xmlDoc.getElementsByClass("metadata__byline__author");						
 			if("CNN Library".equalsIgnoreCase(authorEle.text())){ //filter fast facts
 				System.out.println(titleEle.text()+"--- by CNN Library");
-				return;
+				return null;
 			}
 			String author = authorEle.text();
 			if(author.startsWith("By ")) author = author.replaceFirst("By ", ""); //trim prefix
@@ -49,7 +45,7 @@ public class HtmlParser {
 			String catStr = path[4];						
 			if(catStr.equalsIgnoreCase("opinions")){ //filter "opinion"
 				System.out.println(titleEle.text()+"--- is opinion");
-				return;
+				return null;
 			}			
 			int cat = ArticleCategory.getCatId(src, catStr);			
 			//System.out.println(catStr+" "+cat);
@@ -88,18 +84,17 @@ public class HtmlParser {
 				String s3Url = ImageHandler.saveImage(img, new Date().getTime()+".jpg");
 				article.setS3ImgUrl(s3Url);
 			}
-			System.out.println(article);			
-			articleDbHandler.insertArticle(article);
+			return article;			
 			
 		}catch(Exception e){
 			System.out.println(urlStr+" excpetion");
 			e.printStackTrace();
-			return;
+			return null;
 		}
 		
 	}
 	
-	public static void parseVoa(String urlStr, Date date, String img) throws Exception {
+	public static Article parseVoa(String urlStr, Date date, String img){
 		//http://www.voanews.com/api/epiqq
 		//http://www.voanews.com/content/study-says-well-known-common-drug-may-block-ebola/2806197.html
 		try{
@@ -111,7 +106,7 @@ public class HtmlParser {
 			
 			if(!path[1].equals("content")){
 				System.out.println(urlStr+"-- is not content");
-				return;
+				return null;
 			}
 			
 			Elements catEle = xmlDoc.getElementsByClass("sitetitle");
@@ -138,56 +133,58 @@ public class HtmlParser {
 				String s3Url = ImageHandler.saveImage(img, new Date().getTime()+".jpg");
 				article.setS3ImgUrl(s3Url);
 			}
-			System.out.println(article);
-			articleDbHandler.insertArticle(article);
+			return article;				
+			
 		}catch(Exception e){
 			System.out.println(urlStr+" excpetion");
 			e.printStackTrace();
-			return;
+			return null;
 		}
 		
 	}
 	
-	public static void parse60s(String urlStr, Date date) throws Exception {
+	public static Article parse60s(String urlStr, Date date){
 		//http://rss.sciam.com/sciam/60secsciencepodcast
 		//http://www.scientificamerican.com/podcast/episode/ancient-human-migration-route-marked-by-snail-shell-bread-crumbs/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+sciam%2F60secsciencepodcast+%28Podcast%3A+Scientific+American+-+60-Second+Science%29
-		Response response = Jsoup.connect(urlStr).followRedirects(true).execute();
-		Document xmlDoc = response.parse();
-		urlStr = response.url().toString();
-		URL url = new URL(urlStr);
-		String img = ""; //60s doesn't have image
-
-		
-		Elements titleEle = xmlDoc.getElementsByClass("article-title");				
-		
-		//author
-		Elements author_timeEle = xmlDoc.getElementsByClass("article-author");
-		String[] authorSplit = author_timeEle.text().split("\\|");
-		String author = authorSplit[0].split("By ")[1];
-		
-		//content
-		Elements textEle = xmlDoc.getElementsByClass("article-content");
-		Elements paragraphsEle = textEle.get(0).getElementsByTag("p");		
-		LinkedList<String> paragraphs = new LinkedList<String>();
-		for(int i=0;i<paragraphsEle.size()-2;i++){
-			Element element = paragraphsEle.get(i);
-			paragraphs.add(element.text());
+		try{
+			Response response = Jsoup.connect(urlStr).followRedirects(true).execute();
+			Document xmlDoc = response.parse();
+			urlStr = response.url().toString();
+			String img = ""; //60s doesn't have image
+	
+			
+			Elements titleEle = xmlDoc.getElementsByClass("article-title");				
+			
+			//author
+			Elements author_timeEle = xmlDoc.getElementsByClass("article-author");
+			String[] authorSplit = author_timeEle.text().split("\\|");
+			String author = authorSplit[0].split("By ")[1];
+			
+			//content
+			Elements textEle = xmlDoc.getElementsByClass("article-content");
+			Elements paragraphsEle = textEle.get(0).getElementsByTag("p");		
+			LinkedList<String> paragraphs = new LinkedList<String>();
+			for(int i=0;i<paragraphsEle.size()-2;i++){
+				Element element = paragraphsEle.get(i);
+				paragraphs.add(element.text());
+			}
+			
+			//category
+			int src = ArticleCategory.SRC_60S;
+			Elements catEle = xmlDoc.getElementsByAttributeValue("itemProp", "title");
+			String catStr = catEle.get(0).text();		
+			int cat = ArticleCategory.getCatId(src, catStr);
+			System.out.println(catStr+" "+cat);
+			
+			//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
+			Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
+			return article;	
+		}catch(Exception e){
+			System.out.println(urlStr+" excpetion");
+			e.printStackTrace();
+			return null;
 		}
 		
-		//category
-		int src = ArticleCategory.SRC_60S;
-		Elements catEle = xmlDoc.getElementsByAttributeValue("itemProp", "title");
-		String catStr = catEle.get(0).text();		
-		int cat = ArticleCategory.getCatId(src, catStr);
-		System.out.println(catStr+" "+cat);
-		
-		//Article(String title, String author, String time, String url, int src, int cat, LinkedList<String> paragraphs)
-		Article article = new Article(titleEle.text(), author, date, urlStr, src, cat, paragraphs, img);
-		//System.out.println(article);
-		System.out.println(article.getUrl());
-		System.out.println(article.getFirst50Words());
-		System.out.println("");
-		//articleDbHandler.insertArticle(article);		
 	}
 	//http://www.reuters.com/article/2015/06/06/us-tennis-french-women-idUSKBN0OM0MS20150606
 	//http://www.scientificamerican.com/

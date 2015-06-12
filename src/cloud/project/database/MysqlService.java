@@ -116,14 +116,14 @@ public class MysqlService {
 		return uid;
 	}
 	
-	public static void insertArticle(Article article){
+	public static int insertArticle(Article article){
 		Connection con=connect();
 		//"INSERT INTO article(title, articleSourceId, url, category_id, author, time, content, image) "
 		PreparedStatement stat;
 		
 		try {
-			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content, image)"
-					+ "VALUES(?,?,?,?,?,?,?,?)");
+			stat = con.prepareStatement("INSERT INTO articles(title, articleSourceId, url, categoryId, author, time, content, image, caption, wordCount)"
+					+ "VALUES(?,?,?,?,?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 			stat.setString(1, article.getTitle()); //title
 			stat.setInt(2, article.getSrc()); //src_id
 			stat.setString(3, article.getUrl()); //url
@@ -132,12 +132,19 @@ public class MysqlService {
 			stat.setObject(6, article.getDate()); //time		
 			stat.setString(7, article.getParagraphStr()); //content
 			stat.setString(8, article.getS3ImgUrl()); //img url
-						
-			con.close();
-		} catch (SQLException e) {
+			stat.setString(9, article.getFirst50Words()); //caption
+			stat.setInt(10, article.getWordCnt()); //wordCount
+			stat.executeUpdate();
+			
+			ResultSet rs = stat.getGeneratedKeys();
+			rs.next();
+			con.close();			
+			return rs.getInt(1);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return -1;
 		
 	}
 	

@@ -2,14 +2,32 @@ package cloud.project.rss;
 
 import java.util.ArrayList;
 
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+
+import cloud.project.AwsManager;
+import cloud.project.FileMgr;
+import cloud.project.Header;
+import cloud.project.database.ArticleDbHandler;
+import cloud.project.parse.Article;
 import cloud.project.parse.HtmlParser;
 import cloud.project.rss.RSS.RSSItem;
 
 public class PollHandler {
-	public static void pollCnn() throws Exception{
-		RSS rss;
+	public static void putSqs(String str){
+		AmazonSQS sqsClient = AwsManager.getSqsClient();
+		SendMessageRequest req = new SendMessageRequest();
+		req.setQueueUrl(Header.SQS_URL);
+		req.setMessageBody(str);
+		sqsClient.sendMessage(req);
+	}
+	
+	
+	public static void pollCnn(RSS rss){
+		
+		ArticleDbHandler dbHandler = new ArticleDbHandler();
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
-		rss = new RSS("http://rss.cnn.com/rss/cnn_latest.rss", 60);
+		//rss = new RSS("http://rss.cnn.com/rss/cnn_latest.rss", 60);
 		
 		System.out.println("Polling cnn feed...");
 		ArrayList<RSSItem> list = null;
@@ -20,16 +38,33 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			//System.out.println(item. + " - " + item.getTitle() + ": " + item.getLink());
-			HtmlParser.parseCnn(item.getLink(), item.getDate());
-			//System.out.println("--------------------------------");
+			Article article = HtmlParser.parseCnn(item.getLink(), item.getDate());
+			if(article==null) continue;
+			System.out.println(article);
+			try{
+				int id = dbHandler.insertArticle(article);
+				if(id==-1){
+					System.out.println("db id = -1");
+					continue;
+				}
+				else{
+					System.out.println("article mysql saved");
+					String fileUrl = FileMgr.saveArticle(id+".txt", article.getFileStr());
+					System.out.println("article txt saved - "+fileUrl);
+					putSqs(fileUrl);
+					System.out.println("article in sqs");
+				}			
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 	
-	public static void pollVoa() throws Exception{
-		RSS rss;
+	public static void pollVoa(RSS rss){
+		ArticleDbHandler dbHandler = new ArticleDbHandler();
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
-		rss = new RSS("http://www.voanews.com/api/epiqq", 60);
+		//rss = new RSS("http://www.voanews.com/api/epiqq", 60);
 		
 		System.out.println("Polling voa feed...");
 		ArrayList<RSSItem> list = null;
@@ -40,16 +75,32 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			//System.out.println(item.getFeedTitle() + " - " + item.getTitle() + ": " + item.getLink());
-			HtmlParser.parseVoa(item.getLink(), item.getDate(), item.getImg());
-			System.out.println("--------------------------------");
+			Article article = HtmlParser.parseVoa(item.getLink(), item.getDate(), item.getImg());
+			if(article==null) continue;
+			System.out.println(article);
+			try{
+				int id = dbHandler.insertArticle(article);
+				if(id==-1){
+					System.out.println("db id = -1");
+					continue;
+				}
+				else{
+					System.out.println("article mysql saved");
+					String fileUrl = FileMgr.saveArticle(id+".txt", article.getFileStr());
+					System.out.println("article txt saved - "+fileUrl);
+				}			
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 	
-	public static void poll60s() throws Exception{
-		RSS rss;
+	public static void poll60s(RSS rss){
+		
+		ArticleDbHandler dbHandler = new ArticleDbHandler();
 		/* Construct a new RSS object with a poll timeout of 60 seconds */
-		rss = new RSS("http://rss.sciam.com/sciam/60secsciencepodcast", 60);
+		//rss = new RSS("http://rss.sciam.com/sciam/60secsciencepodcast", 60);
 		
 		System.out.println("Polling 60s feed...");
 		ArrayList<RSSItem> list = null;
@@ -60,9 +111,24 @@ public class PollHandler {
 		}
 		System.out.println(list.size());
 		for(RSSItem item : list) {
-			System.out.println(item.getTitle() + ": " + item.getLink());
-			HtmlParser.parse60s(item.getLink(), item.getDate());
-			//System.out.println("--------------------------------");
+			Article article = HtmlParser.parse60s(item.getLink(), item.getDate());
+			if(article==null) continue;
+			System.out.println(article);
+			try{
+				int id = dbHandler.insertArticle(article);
+				if(id==-1){
+					System.out.println("db id = -1");
+					continue;
+				}
+				else{
+					System.out.println("article mysql saved");
+					String fileUrl = FileMgr.saveArticle(id+".txt", article.getFileStr());
+					System.out.println("article txt saved - "+fileUrl);
+				}			
+				
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 	

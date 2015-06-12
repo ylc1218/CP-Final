@@ -35,8 +35,8 @@ public class ImageHandler {
 		
 		File file = tempFilePath.toFile();
 		AmazonS3 s3client = AwsManager.getS3Client();
-		s3client.putObject(new PutObjectRequest(Header.S3_NEWS_BUCKET_NAME, Header.S3_NEWS_PHOTO_DIR+fileName, file));		
+		s3client.putObject(new PutObjectRequest(Header.S3_BUCKET_NAME, Header.S3_NEWS_PHOTO_DIR+fileName, file));		
 		Files.delete(tempFilePath);
-		return Header.S3_PREFIX+Header.S3_NEWS_BUCKET_NAME+"/"+Header.S3_NEWS_PHOTO_DIR+fileName;
+		return Header.S3_PREFIX+Header.S3_BUCKET_NAME+"/"+Header.S3_NEWS_PHOTO_DIR+fileName;
 	}
 }

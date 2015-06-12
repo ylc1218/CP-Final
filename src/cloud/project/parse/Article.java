@@ -16,6 +16,7 @@ public class Article{
 	private String img;
 	private String s3ImgUrl="";
 	private String paragraphStr="";
+	private int wordCnt = -1;
 	
 	public Article(String title, String author, Date date, String url, int src, int cat, LinkedList<String> paragraphs, String img){		
 		this.title = title;
@@ -31,20 +32,19 @@ public class Article{
 	@Override
 	public String toString(){
 		StringBuilder sb = new StringBuilder();
-		sb.append("url:"+ url+"\n");
-		sb.append("title:"+ title+"\n");
-		sb.append("img:"+img+"\n");
-		sb.append("(s3-img:"+s3ImgUrl+")\n");
-		sb.append("author:"+author+"\n");
-		sb.append("date:"+date+"\n");
-		sb.append("text:"+getParagraphStr());			
+		sb.append("url:\t"+ url+"\n");
+		sb.append("title:\t"+ title+"\n");
+		sb.append("img:\t"+img+"\n");
+		sb.append("(s3-img:\t"+s3ImgUrl+")\n");
+		sb.append("author:\t"+author+"\n");
+		sb.append("date:\t"+date+"\n");
+		sb.append("text:\t"+getParagraphStr()+"\n");
+		sb.append("wordCnt:\t"+getWordCnt()+"\n");
 		sb.append("-----------------------------\n");
 		return sb.toString();
 	}
-
 	
-	public String getParagraphStr(){
-		if(paragraphStr!="") return paragraphStr;
+	private void prepare(){
 		StringBuilder sb = new StringBuilder();
 		for(String paragraph:paragraphs){
 			paragraph = paragraph.replaceAll("¡¦", "'");
@@ -52,7 +52,26 @@ public class Article{
 			sb.append("<p>"+spanP+"</p>");
 		}
 		paragraphStr = sb.toString();
-		return paragraphStr;
+		
+		Pattern p = Pattern.compile("<span>");
+		Matcher m = p.matcher(paragraphStr);
+		
+		wordCnt = 0;
+		while(m.find()) wordCnt++;
+	}
+	
+	public String getFileStr(){
+		StringBuilder sb = new StringBuilder();
+		for(String paragraph:paragraphs){
+			paragraph = paragraph.replaceAll("¡¦", "'");			
+			sb.append(paragraph+"\n");
+		}
+		return sb.toString();		
+	}
+	
+	public String getParagraphStr(){
+		if(paragraphStr=="") prepare();
+		return paragraphStr;		
 	}
 	
 	public String getFirst50Words(){
@@ -92,6 +111,11 @@ public class Article{
 	
 	public int getCat(){
 		return cat;
+	}
+	
+	public int getWordCnt(){
+		if(wordCnt==-1) prepare();
+		return wordCnt;
 	}
 	
 	public String getImg(){

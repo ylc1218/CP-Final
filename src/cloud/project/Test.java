@@ -11,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -52,12 +53,60 @@ public class Test {
 		//PollHandler.poll60s();
 		//ImageHandler.saveImage("http://gdb.voanews.com/30D156D4-4570-4DB3-9AEE-41994F5EB36A_cx0_cy10_cw0_w800_h450.jpg", "./myImg.jpg");
 		//HtmlParser.parseCnn("http://edition.cnn.com/2015/06/09/living/cnnphotos-american-puzzles/index.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+rss%2Fcnn_latest+%28RSS%3A+CNN+-+Most+Recent%29%20excpetion", new Date());
-		
-		TranslationHandler.getDefaultWordsTranslation();
-	 	/*WordParsed word = TranslationHandler.getTranslation("his");
+	 		 
+		//TranslationHandler.getDefaultWordsTranslation();
+	 	/*WordParsed word = TranslationHandler.getTranslationHtml("longer");
 	 	System.out.println(word.explains);*/
-	 			
-	}	
+	 		 
+	 	//FileMgr.saveArticle("temp.txt", "lulu means awesome");
+	 	tryPeriodicallyPoll();
+	}
+	
+	private static void tryPeriodicallyPoll() throws Exception{
+		System.out.println("Poll message start." + new Date());
+		final RSS rssCnn = new RSS("http://rss.cnn.com/rss/cnn_latest.rss", 60);
+		final RSS rssVoa = new RSS("http://www.voanews.com/api/epiqq", 60);
+		final RSS rss60s = new RSS("http://rss.sciam.com/sciam/60secsciencepodcast", 60);
+		
+		rssCnn.eat();
+		rssVoa.eat();
+		rss60s.eat();
+		
+		TimerTask taskCnn = new TimerTask() {				
+			@Override
+			public void run() {
+				System.out.println("task cnn");
+				PollHandler.pollCnn(rssCnn);
+			}
+		};
+		
+		TimerTask taskVoa = new TimerTask() {			
+			@Override
+			public void run() {
+				System.out.println("task voa");
+				PollHandler.pollVoa(rssVoa);
+			}
+		};
+		
+		TimerTask task60s = new TimerTask() {			
+			@Override
+			public void run() {
+				System.out.println("task 60s");
+				PollHandler.poll60s(rss60s);
+			}
+		};
+		
+		/* Schedule a timer to poll feeds every 5 minutes */
+		Timer timerCnn = new Timer();
+		Timer timerVoa = new Timer();
+		Timer timer60s = new Timer();
+		
+		long delay = 60 * 1 * 1000; // 5 minutes
+		
+		timerCnn.schedule(taskCnn, delay, delay); // No need to set the second parameter to 0, we've just eaten the feeds.
+		timerVoa.schedule(taskVoa, delay, delay); // No need to set the second parameter to 0, we've just eaten the feeds.
+		timer60s.schedule(task60s, delay, delay); // No need to set the second parameter to 0, we've just eaten the feeds.
+	}
 
 	private static void testJson() throws JSONException{
 		//String s =" {\"translation\":[\"loni\"],\"basic\":{\"explains\":[\"n. (Loni)鈭箏���(敺瑯���)瘣側\"]},\"query\":\"Loni\",\"errorCode\":0,\"web\":[{\"value\":[\"摰�恕\",\"Laboratory Of Neuro Imaging\",\"UCLA Laboratory of Neuro Imaging\"],\"key\":\"LONI\"},{\"value\":[\"蝵側繚餈芷蝐單\"],\"key\":\"loni dunamis\"},{\"value\":[\"��倌\"],\"key\":\"Loni Zwahlen\"}]}";
